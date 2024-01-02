@@ -28,7 +28,7 @@ from datetime import date
 import nltk
 import docx2txt
 import pandas as pd
-from tika import parser
+
 import phonenumbers
 import pdfplumber
 
@@ -255,23 +255,6 @@ class resumeparse(object):
             resume_lines = clean_text.splitlines()  # Split text blob into individual lines
             resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]  # Remove empty strings and whitespaces
             return resume_lines, text
-        try:
-          print('in docx parser')
-          if docx_parser == "tika":
-            text = parser.from_file(docx_file, service='text')['content']
-          elif docx_parser == "docx2txt":
-            text = docx2txt.process(docx_file)
-          else:
-            logging.error('Choose docx_parser from tika or docx2txt :: ' + str(e)+' is not supported')
-            return [], " "
-        except RuntimeError as e:            
-            logging.error('Error in tika installation:: ' + str(e))
-            logging.error('--------------------------')
-            logging.error('Install java for better result ')
-            text = docx2txt.process(docx_file)
-        except Exception as e:
-            logging.error('Error in docx file:: ' + str(e))
-            return [], " "
         try:
             clean_text = re.sub(r'\n+', '\n', text)
             clean_text = clean_text.replace("\r", "\n").replace("\t", " ")  # Normalize text blob
