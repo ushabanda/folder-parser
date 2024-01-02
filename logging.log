@@ -1,0 +1,89 @@
+2023-12-08 17:04:41,610 - WARNING -  * Debugger is active!
+2023-12-08 17:04:41,616 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 17:05:01,895 - INFO - Request received
+2023-12-08 17:05:01,895 - INFO - Received resume
+2023-12-08 17:05:01,895 - INFO - file saved
+2023-12-08 17:05:01,983 - INFO - resume parsed
+2023-12-08 17:05:01,983 - INFO - 127.0.0.1 - - [08/Dec/2023 17:05:01] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:18:53,311 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\app.py', reloading
+2023-12-08 17:19:02,635 - WARNING -  * Debugger is active!
+2023-12-08 17:19:02,641 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 17:19:47,446 - INFO - Request received
+2023-12-08 17:19:47,449 - INFO - Received resume
+2023-12-08 17:19:47,451 - INFO - file saved
+2023-12-08 17:19:47,627 - INFO - resume parsed
+2023-12-08 17:19:47,627 - INFO - 127.0.0.1 - - [08/Dec/2023 17:19:47] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:42:53,359 - INFO - Request received
+2023-12-08 17:42:53,400 - INFO - Received resume
+2023-12-08 17:42:53,400 - INFO - file saved
+2023-12-08 17:42:55,277 - INFO - resume parsed
+2023-12-08 17:42:55,277 - INFO - 127.0.0.1 - - [08/Dec/2023 17:42:55] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:44:37,473 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\resumeparse.py', reloading
+2023-12-08 17:44:47,107 - WARNING -  * Debugger is active!
+2023-12-08 17:44:47,107 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 17:45:15,998 - INFO - Request received
+2023-12-08 17:45:16,011 - INFO - Received resume
+2023-12-08 17:45:16,013 - INFO - file saved
+2023-12-08 17:45:16,253 - INFO - resume parsed
+2023-12-08 17:45:16,253 - INFO - 127.0.0.1 - - [08/Dec/2023 17:45:16] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:46:04,445 - INFO - Request received
+2023-12-08 17:46:04,465 - INFO - Received resume
+2023-12-08 17:46:04,467 - INFO - file saved
+2023-12-08 17:46:05,405 - INFO - resume parsed
+2023-12-08 17:46:05,405 - INFO - 127.0.0.1 - - [08/Dec/2023 17:46:05] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:58:28,181 - INFO - Request received
+2023-12-08 17:58:28,183 - INFO - Received resume
+2023-12-08 17:58:28,184 - INFO - file saved
+2023-12-08 17:58:28,436 - ERROR - error
+2023-12-08 17:58:28,436 - INFO - 127.0.0.1 - - [08/Dec/2023 17:58:28] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:58:33,222 - INFO - Request received
+2023-12-08 17:58:33,225 - INFO - Received resume
+2023-12-08 17:58:33,227 - INFO - file saved
+2023-12-08 17:58:33,377 - ERROR - error
+2023-12-08 17:58:33,377 - INFO - 127.0.0.1 - - [08/Dec/2023 17:58:33] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 17:58:56,774 - INFO - Request received
+2023-12-08 17:58:56,775 - INFO - Received resume
+2023-12-08 17:58:56,776 - INFO - file saved
+2023-12-08 17:58:56,912 - ERROR - error
+2023-12-08 17:58:56,912 - INFO - 127.0.0.1 - - [08/Dec/2023 17:58:56] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 18:06:24,558 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\app.py', reloading
+2023-12-08 18:06:34,069 - WARNING -  * Debugger is active!
+2023-12-08 18:06:34,084 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 18:06:46,744 - INFO - Request received
+2023-12-08 18:06:46,744 - INFO - Received resume
+2023-12-08 18:06:46,744 - INFO - file saved
+2023-12-08 18:06:46,895 - ERROR - error:list index out of range
+2023-12-08 18:06:46,895 - INFO - 127.0.0.1 - - [08/Dec/2023 18:06:46] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 18:07:36,065 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\app.py', reloading
+2023-12-08 18:07:45,592 - WARNING -  * Debugger is active!
+2023-12-08 18:07:45,592 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 18:08:37,263 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\app.py', reloading
+2023-12-08 18:08:46,544 - WARNING -  * Debugger is active!
+2023-12-08 18:08:46,559 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 18:08:54,910 - INFO - Request received
+2023-12-08 18:08:54,911 - INFO - Received resume
+2023-12-08 18:08:54,911 - INFO - file saved
+2023-12-08 18:08:55,046 - ERROR - error:list index out of range
+2023-12-08 18:08:55,046 - INFO - 127.0.0.1 - - [08/Dec/2023 18:08:55] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 18:11:17,479 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\app.py', reloading
+2023-12-08 18:11:26,531 - WARNING -  * Debugger is active!
+2023-12-08 18:11:26,535 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 18:11:52,997 - INFO - Request received
+2023-12-08 18:11:52,999 - INFO - Received resume
+2023-12-08 18:11:53,000 - INFO - file saved
+2023-12-08 18:11:53,145 - ERROR - error:list index out of range
+2023-12-08 18:11:53,145 - INFO - 127.0.0.1 - - [08/Dec/2023 18:11:53] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 18:12:48,604 - INFO - Request received
+2023-12-08 18:12:48,604 - INFO - Received resume
+2023-12-08 18:12:48,618 - INFO - file saved
+2023-12-08 18:12:48,925 - INFO - resume parsed
+2023-12-08 18:12:48,926 - INFO - 127.0.0.1 - - [08/Dec/2023 18:12:48] "POST /resumeparse HTTP/1.1" 200 -
+2023-12-08 18:26:40,551 - INFO -  * Detected change in 'C:\\resume-parser\\resume_parser\\resume_parser\\app.py', reloading
+2023-12-08 18:26:50,630 - INFO - inside Class:ResumeParser
+2023-12-08 18:26:50,638 - WARNING -  * Debugger is active!
+2023-12-08 18:26:50,641 - INFO -  * Debugger PIN: 119-165-987
+2023-12-08 18:27:03,399 - INFO - Request received
+2023-12-08 18:27:03,404 - INFO - Received resume
+2023-12-08 18:27:03,414 - INFO - file saved
+2023-12-08 18:27:03,618 - INFO - resume parsed
+2023-12-08 18:27:03,618 - INFO - 127.0.0.1 - - [08/Dec/2023 18:27:03] "POST /resumeparse HTTP/1.1" 200 -
