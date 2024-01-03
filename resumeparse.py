@@ -24,7 +24,6 @@ import aspose.words as aw
 import re
 import os
 from datetime import date
-
 import nltk
 import docx2txt
 import pandas as pd
@@ -645,16 +644,24 @@ class resumeparse(object):
             
             print(section_type)
             print(section_start)
-                        
-    
-            section_end_match = re.search(r'(?<=\. )(?::|$|TECHNICAL SKILL|Education|EDUCATION|\bExperience\b|WORK EXPERIENCE|EXPERIENCE|Technical Skill|Skills|SKILL|SKILLS|Skill|Course|COURSE|Academic Qualification|\bCAREER TIMELINE\b)', section_start)
-            
+
+            section_end_match = re.search(r'(?::|$)')
 
             if section_end_match:
                 section_end_index = section_end_match.start()
                 section_details = section_start[:section_end_index].strip()
                 objectives.append((section_type, section_details))
-                print(objectives, "677")
+                print(objectives, "653")
+
+            else:
+                section_end_match = re.search(r'(?<=\. )(?::|$|TECHNICAL SKILL|Education|EDUCATION|\bExperience\b|WORK EXPERIENCE|EXPERIENCE|Technical Skill|Skills|SKILL|SKILLS|Skill|Course|COURSE|Academic Qualification|\bCAREER TIMELINE\b|Certifications)', section_start)
+            
+
+                if section_end_match:
+                    section_end_index = section_end_match.start()
+                    section_details = section_start[:section_end_index].strip()
+                    objectives.append((section_type, section_details))
+                    print(objectives, "664")
 
 
         return objectives
