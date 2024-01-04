@@ -23,25 +23,23 @@ def parse_resume():
     print("Received a request to parse resume")
     try:
         # Get the resume file from the request
-        print('1')
+        
         
         resume_file = request.files['resume']
         docx_parser = request.form.get('docx_parser', 'tika')
         
-        print(resume_file)
-        print(docx_parser)
         
         filename = resume_file.filename
 
         # Save the file to a temporary location
         if filename.lower().endswith('docx'):
-            print("in doc check")
+            
             resume_file_path = 'True_Talent.docx'
         elif filename.lower().endswith('pdf'):
-            print('in pdf')
+           
             resume_file_path = 'True_Talent.pdf'
         elif filename.lower().endswith('doc'):
-            print("going to backend")
+            
             resume_file_path = 'True_Talent.doc'
             
         

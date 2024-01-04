@@ -235,18 +235,17 @@ class resumeparse(object):
             :rtype: str
         """
         try:
-            print(docx_file)
+            
             text = docx2txt.process(docx_file)  # Extract text from docx file
-            print("241")
+            
             clean_text = text.replace("\r", "\n").replace("\t", " ")  # Normalize text blob
-            print("242")
+            
             resume_lines = clean_text.splitlines()  # Split text blob into individual lines
             resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]  # Remove empty strings and whitespaces
-            print('246')
-            #print(resume_lines)
+            
+            
             return resume_lines, text
         except KeyError:
-            print('suma')
             
             text = textract.process(docx_file)
             text = text.decode("utf-8")
@@ -266,19 +265,19 @@ class resumeparse(object):
             return [], " "
 
     def convert_doc_to_txt(doc_file):
-        print(doc_file)
+        
         doc = aw.Document('True_Talent.doc')
         doc.save("True_Talent(doc_to_docx).docx")
-        print("hello")
+        
         text = docx2txt.process('True_Talent(doc_to_docx).docx')  # Extract text from docx file
-        print("241")
+        
         clean_text = text.replace("\r", "\n").replace("\t", " ")  # Normalize text blob            print("242")
         resume_lines = clean_text.splitlines()  # Split text blob into individual lines
         resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]  # Remove empty strings and whitespaces
-        print('246')
+
         resume_lines = resume_lines[1:]
         resume_lines = resume_lines[:-3]
-        #print(resume_lines)
+        
         return resume_lines, text
 
 
@@ -307,18 +306,15 @@ class resumeparse(object):
         #     raw_text = parser.from_file(pdf_file, service='text')['content']
         #     print("in try")
         # except RuntimeError as e:  
-        try:
-            print("in excpt")          
+        try:        
             # logging.error('Error in tika installation:: ' + str(e))
             # logging.error('--------------------------')
             # logging.error('Install java for better result ')
             pdf = pdfplumber.open(pdf_file)
             raw_text= ""
-            print("in pdf plumber")
             for page in pdf.pages:
               raw_text += page.extract_text() + "\n"
-            pdf.close()  
-            print('out except 313')              
+            pdf.close()                
         except Exception as e:
             logging.error('Error in docx file:: ' + str(e))
             return [], " "
@@ -642,8 +638,6 @@ class resumeparse(object):
             section_type = start_match.group(1)
             section_start = start_match.group(2)
             
-            print(section_type)
-            print(section_start)
 
             section_end_match = re.search(r'(?::|$)', section_start)
 
@@ -651,7 +645,6 @@ class resumeparse(object):
                 section_end_index = section_end_match.start()
                 section_details = section_start[:section_end_index].strip()
                 objectives.append((section_type, section_details))
-                print(objectives, "653")
 
             else:
                 section_end_match = re.search(r'(?<=\. )(?::|$|TECHNICAL SKILL|Education|EDUCATION|\bExperience\b|WORK EXPERIENCE|EXPERIENCE|Technical Skill|Skills|SKILL|SKILLS|Skill|Course|COURSE|Academic Qualification|\bCAREER TIMELINE\b|Certifications)', section_start)
@@ -661,7 +654,6 @@ class resumeparse(object):
                     section_end_index = section_end_match.start()
                     section_details = section_start[:section_end_index].strip()
                     objectives.append((section_type, section_details))
-                    print(objectives, "664")
 
 
         return objectives
@@ -784,30 +776,23 @@ class resumeparse(object):
         docx_parser : Enter docx2txt or tika, by default is tika
         """
         # file = "/content/Asst Manager Trust Administration.docx"
-        print("comming to file")
         print("\n\n\n\n File == ",file,"\n\n")
         file = os.path.join(file)
-        print("15")
         if file.endswith('docx'):
-            print("in docx")
             resume_lines, raw_text = resumeparse.convert_docx_to_txt(file)
         
         elif file.endswith('doc'):
-            print("in doc 781")
             resume_lines, raw_text = resumeparse.convert_doc_to_txt(file)
         
         elif file.endswith('pdf'):
-            print("in pdf")
             resume_lines, raw_text = resumeparse.convert_pdf_to_txt(file)
         elif file.endswith('txt'):
-            print("in txt")
             with open(file, 'r', encoding='latin') as f:
                 resume_lines = f.readlines()
 
         else:
             resume_lines = None
         resume_segments = resumeparse.segment(resume_lines)
-        print("2")
         
         full_text = " ".join(resume_lines)
 
@@ -840,13 +825,11 @@ class resumeparse(object):
         # address_components = resumeparse.extract_address(full_text)
 
         objective = resumeparse.extract_objective(full_text)
-        print(objective)
         if not objective:
             objectives=""
             
         else:
             full_sentences = objective[0][1][:1500]
-            print("859")
             if not full_sentences.endswith('.'):
                 
                 text = full_sentences.split('.')
