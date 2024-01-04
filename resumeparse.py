@@ -10,7 +10,7 @@
 # !pip install stemming
 
 from __future__ import division
-import nltk
+#import nltk
 import aspose.words as aw
 
 # nltk.download('punkt')
@@ -24,9 +24,9 @@ import aspose.words as aw
 import re
 import os
 from datetime import date
-import nltk
+#import nltk
 import docx2txt
-import pandas as pd
+#import pandas as pd
 
 import phonenumbers
 import pdfplumber
@@ -41,7 +41,7 @@ from spacy.matcher import PhraseMatcher
 import sys
 import operator
 import string
-import nltk
+#import nltk
 from stemming.porter2 import stem
 
 # load pre-trained model
@@ -61,16 +61,16 @@ file = os.path.join(base_path,"titles_combined.txt")
 file = open(file, "r", encoding='utf-8')
 designation = [line.strip().lower() for line in file]
 designitionmatcher = PhraseMatcher(nlp.vocab)
-patterns = [nlp.make_doc(text) for text in designation if len(nlp.make_doc(text)) < 10]
-designitionmatcher.add("Job title", None, *patterns)
+#patterns = [nlp.make_doc(text) for text in designation if len(nlp.make_doc(text)) < 10]
+designitionmatcher.add("Job title", None)
                         
 # The below 6 line code is to extract skills
 file = os.path.join(base_path,"LINKEDIN_SKILLS_ORIGINAL.txt") 
 file = open(file, "r", encoding='utf-8')    
 skill = [line.strip().lower() for line in file]
 skillsmatcher = PhraseMatcher(nlp.vocab)
-patterns = [nlp.make_doc(text) for text in skill if len(nlp.make_doc(text)) < 10]
-skillsmatcher.add("Job title", None, *patterns)
+#patterns = [nlp.make_doc(text) for text in skill if len(nlp.make_doc(text)) < 10]
+skillsmatcher.add("Job title", None)
 
 
 class resumeparse(object):
@@ -645,7 +645,7 @@ class resumeparse(object):
             print(section_type)
             print(section_start)
 
-            section_end_match = re.search(r'(?::|$)')
+            section_end_match = re.search(r'(?::|$)', section_start)
 
             if section_end_match:
                 section_end_index = section_end_match.start()
@@ -688,21 +688,21 @@ class resumeparse(object):
                 first_name, last_name = first_name.split(' ', 1)
         return first_name, last_name
 
-    def extract_university(text, file):
-        df = pd.read_csv(file, header=None)
-        universities = [i.lower() for i in df[1]]
-        college_name = []
-        listex = universities
-        listsearch = [text.lower()]
+    # def extract_university(text, file):
+    #     df = pd.read_csv(file, header=None)
+    #     universities = [i.lower() for i in df[1]]
+    #     college_name = []
+    #     listex = universities
+    #     listsearch = [text.lower()]
 
-        for i in range(len(listex)):
-            for ii in range(len(listsearch)):
+    #     for i in range(len(listex)):
+    #         for ii in range(len(listsearch)):
                 
-                if re.findall(listex[i], re.sub(' +', ' ', listsearch[ii])):
+    #             if re.findall(listex[i], re.sub(' +', ' ', listsearch[ii])):
                 
-                    college_name.append(listex[i])
+    #                 college_name.append(listex[i])
         
-        return college_name
+    #     return college_name
 
     def job_designition(text):
         job_titles = []
