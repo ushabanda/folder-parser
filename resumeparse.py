@@ -277,6 +277,7 @@ class resumeparse(object):
 
         resume_lines = resume_lines[1:]
         resume_lines = resume_lines[:-3]
+        print(resume_lines)
         
         return resume_lines, text
 
@@ -660,25 +661,36 @@ class resumeparse(object):
    
     def extract_name(resume_text):
         nlp_text = nlp(resume_text)
+        print(nlp_text)
 
-        # First name and Last name are always Proper Nouns
-        # pattern_FML = [{'POS': 'PROPN', 'ENT_TYPE': 'PERSON', 'OP': '+'}]
-
-        pattern = [{'POS': 'PROPN'}, {'POS': 'PROPN'}]
+        pattern = [{'POS': 'PROPN'}]
         matcher.add('NAME', None, pattern)
 
         matches = matcher(nlp_text)
-        first_name = ""
-        last_name = ""
+
+        
+
         for match_id, start, end in matches:
-            span = nlp_text[start:end]
-            if not first_name:
-                first_name = span.text
-            else:
-                  last_name = span.text    
-        if ' ' in first_name:
-                first_name, last_name = first_name.split(' ', 1)
-        return first_name, last_name
+            span = nlp_text[start]
+            
+            return span.text
+        return ""
+
+
+    def extract_full(resume_lines, full_text):
+        # print(resume_lines, 679)
+        print(full_text, 680)
+
+        data = resume_lines
+
+        if not full_text.strip():
+            return ""
+
+
+        else:
+            mainframe_index = next((index for index, value in enumerate(data) if full_text in value), None)
+            full_name = resume_lines[mainframe_index]
+            return full_name
 
     # def extract_university(text, file):
     #     df = pd.read_csv(file, header=None)
@@ -799,7 +811,8 @@ class resumeparse(object):
         email = resumeparse.extract_email(full_text)
         phone = resumeparse.find_phone(full_text)
         name = resumeparse.extract_name(" ".join(resume_segments['contact_info']))
-  
+        print(name, "909")
+        fullname = resumeparse.extract_full(resume_lines, name)
         # total_exp, text = resumeparse.get_experience(resume_segments)
         # university = resumeparse.extract_university(full_text, os.path.join(base_path,'world_universities.csv'))
 
@@ -837,6 +850,13 @@ class resumeparse(object):
                 objectives = full_sentences
             else:
                 objectives = full_sentences
+
+
+        names = fullname
+        array = names.split(" ")
+        print(array)
+        first_name = array[0]
+        last_name = ' '.join(array[1:])
                 
 
 
@@ -846,8 +866,8 @@ class resumeparse(object):
         return {
             "email": email,
             "phone": phone,
-            "first_name": name[0],
-            "last_name": name[1],
+            "first_name": first_name,
+            "last_name": last_name,
             "objective":objectives,
             # "total_exp": total_exp,
             # "university": university,
