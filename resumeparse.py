@@ -10,7 +10,7 @@
 # !pip install stemming
 
 from __future__ import division
-#import nltk
+import nltk
 import aspose.words as aw
 
 # nltk.download('punkt')
@@ -23,10 +23,12 @@ import aspose.words as aw
 
 import re
 import os
+import shutil
 from datetime import date
-#import nltk
+
+import nltk
 import docx2txt
-#import pandas as pd
+import pandas as pd
 
 import phonenumbers
 import pdfplumber
@@ -41,11 +43,12 @@ from spacy.matcher import PhraseMatcher
 import sys
 import operator
 import string
-#import nltk
+import nltk
 from stemming.porter2 import stem
+import mysql.connector
 
 # load pre-trained model
-base_path = os.path.dirname(__file__)
+base_path = os.path.dirname(_file_)
 
 
 nlp = spacy.load('en_core_web_sm')
@@ -61,16 +64,16 @@ file = os.path.join(base_path,"titles_combined.txt")
 file = open(file, "r", encoding='utf-8')
 designation = [line.strip().lower() for line in file]
 designitionmatcher = PhraseMatcher(nlp.vocab)
-#patterns = [nlp.make_doc(text) for text in designation if len(nlp.make_doc(text)) < 10]
-designitionmatcher.add("Job title", None)
+patterns = [nlp.make_doc(text) for text in designation if len(nlp.make_doc(text)) < 10]
+designitionmatcher.add("Job title", None, *patterns)
                         
 # The below 6 line code is to extract skills
 file = os.path.join(base_path,"LINKEDIN_SKILLS_ORIGINAL.txt") 
 file = open(file, "r", encoding='utf-8')    
 skill = [line.strip().lower() for line in file]
 skillsmatcher = PhraseMatcher(nlp.vocab)
-#patterns = [nlp.make_doc(text) for text in skill if len(nlp.make_doc(text)) < 10]
-skillsmatcher.add("Job title", None)
+patterns = [nlp.make_doc(text) for text in skill if len(nlp.make_doc(text)) < 10]
+skillsmatcher.add("Job title", None, *patterns)
 
 
 class resumeparse(object):
@@ -86,7 +89,7 @@ class resumeparse(object):
         - List of project details.
         """
         projects = []
-        project_starts = re.finditer(r'Project[^\w\n]*(\w[^\n]*)', text, re.IGNORECASE)
+        project_starts = re.finditer(r'Project[^\w\n](\w[^\n])', text, re.IGNORECASE)
         
         for start_match in project_starts:
             project_start = start_match.group(1)
@@ -235,17 +238,25 @@ class resumeparse(object):
             :rtype: str
         """
         try:
-            
+            print(docx_file)
             text = docx2txt.process(docx_file)  # Extract text from docx file
+            print("242")
+            # txt_file = "./True_Talent.txt"
+
+            # with open(txt_path, 'w', encoding='utf-8') as txt_file:
+            #     txt_file.write(text)
             
             clean_text = text.replace("\r", "\n").replace("\t", " ")  # Normalize text blob
-            
+            print("243")
             resume_lines = clean_text.splitlines()  # Split text blob into individual lines
+            print("244")
             resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]  # Remove empty strings and whitespaces
             
-            
+            print(resume_lines)
+
             return resume_lines, text
         except KeyError:
+            print('suma')
             
             text = textract.process(docx_file)
             text = text.decode("utf-8")
@@ -265,21 +276,27 @@ class resumeparse(object):
             return [], " "
 
     def convert_doc_to_txt(doc_file):
+        try:
+            print(doc_file)
+            doc = aw.Document(doc_file)
+            doc.save('True_Talent(doc_to_docx).docx')
+            print("hello")
+            text = docx2txt.process('True_Talent(doc_to_docx).docx')  # Extract text from docx file
+            print("241")
+            resume_lines = ""
+            clean_text = text.replace("\r", "\n").replace("\t", " ")  # Normalize text blob            print("242")
+            resume_lines = clean_text.splitlines()  # Split text blob into individual lines
+            resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]  # Remove empty strings and whitespaces
+            print('246')
+            resume_lines = resume_lines[1:]
+            resume_lines = resume_lines[:-3]
+            print(resume_lines)
         
-        doc = aw.Document('True_Talent.doc')
-        doc.save("True_Talent(doc_to_docx).docx")
-        
-        text = docx2txt.process('True_Talent(doc_to_docx).docx')  # Extract text from docx file
-        
-        clean_text = text.replace("\r", "\n").replace("\t", " ")  # Normalize text blob            print("242")
-        resume_lines = clean_text.splitlines()  # Split text blob into individual lines
-        resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]  # Remove empty strings and whitespaces
+            return resume_lines, text
+        except Exception as e:
+            logging.error('Error in doc file:: ' + str(e))
+            return [], " "
 
-        resume_lines = resume_lines[1:]
-        resume_lines = resume_lines[:-3]
-        print(resume_lines)
-        
-        return resume_lines, text
 
 
 
@@ -307,15 +324,18 @@ class resumeparse(object):
         #     raw_text = parser.from_file(pdf_file, service='text')['content']
         #     print("in try")
         # except RuntimeError as e:  
-        try:        
+        try:
+            print("in excpt")          
             # logging.error('Error in tika installation:: ' + str(e))
             # logging.error('--------------------------')
             # logging.error('Install java for better result ')
             pdf = pdfplumber.open(pdf_file)
             raw_text= ""
             for page in pdf.pages:
-              raw_text += page.extract_text() + "\n"
-            pdf.close()                
+                raw_text += page.extract_text() + "\n"
+                
+            pdf.close()  
+            print('out except 313')              
         except Exception as e:
             logging.error('Error in docx file:: ' + str(e))
             return [], " "
@@ -335,7 +355,7 @@ class resumeparse(object):
 
             # Remove empty strings and whitespaces
             resume_lines = [re.sub('\s+', ' ', line.strip()) for line in resume_lines if line.strip()]
-
+            print(resume_lines)
             return resume_lines, raw_text
         except Exception as e:
             logging.error('Error in docx file:: ' + str(e))
@@ -426,163 +446,163 @@ class resumeparse(object):
 
         return resume_segments
 
-    def calculate_experience(resume_text):
+    # def calculate_experience(resume_text):
         
-        #
-        # def get_month_index(month):
-        #   month_dict = {'jan':1, 'feb':2, 'mar':3, 'apr':4, 'may':5, 'jun':6, 'jul':7, 'aug':8, 'sep':9, 'oct':10, 'nov':11, 'dec':12}
-        #   return month_dict[month.lower()]
-        # print(resume_text)
-        # print("*"*100)
-        def correct_year(result):
-            if len(result) < 2:
-                if int(result) > int(str(date.today().year)[-2:]):
-                    result = str(int(str(date.today().year)[:-2]) - 1) + result
-                else:
-                    result = str(date.today().year)[:-2] + result
-            return result
+    #     #
+    #     # def get_month_index(month):
+    #     #   month_dict = {'jan':1, 'feb':2, 'mar':3, 'apr':4, 'may':5, 'jun':6, 'jul':7, 'aug':8, 'sep':9, 'oct':10, 'nov':11, 'dec':12}
+    #     #   return month_dict[month.lower()]
+    #     # print(resume_text)
+    #     # print("*"*100)
+    #     def correct_year(result):
+    #         if len(result) < 2:
+    #             if int(result) > int(str(date.today().year)[-2:]):
+    #                 result = str(int(str(date.today().year)[:-2]) - 1) + result
+    #             else:
+    #                 result = str(date.today().year)[:-2] + result
+    #         return result
 
-        # try:
-        experience = 0
-        start_month = -1
-        start_year = -1
-        end_month = -1
-        end_year = -1
+    #     # try:
+    #     experience = 0
+    #     start_month = -1
+    #     start_year = -1
+    #     end_month = -1
+    #     end_year = -1
 
-        not_alpha_numeric = r'[^a-zA-Z\d]'
-        number = r'(\d{2})'
+    #     not_alpha_numeric = r'[^a-zA-Z\d]'
+    #     number = r'(\d{2})'
 
-        months_num = r'(01)|(02)|(03)|(04)|(05)|(06)|(07)|(08)|(09)|(10)|(11)|(12)'
-        months_short = r'(jan)|(feb)|(mar)|(apr)|(may)|(jun)|(jul)|(aug)|(sep)|(oct)|(nov)|(dec)'
-        months_long = r'(january)|(february)|(march)|(april)|(may)|(june)|(july)|(august)|(september)|(october)|(november)|(december)'
-        month = r'(' + months_num + r'|' + months_short + r'|' + months_long + r')'
-        regex_year = r'((20|19)(\d{2})|(\d{2}))'
-        year = regex_year
-        start_date = month + not_alpha_numeric + r"?" + year
+    #     months_num = r'(01)|(02)|(03)|(04)|(05)|(06)|(07)|(08)|(09)|(10)|(11)|(12)'
+    #     months_short = r'(jan)|(feb)|(mar)|(apr)|(may)|(jun)|(jul)|(aug)|(sep)|(oct)|(nov)|(dec)'
+    #     months_long = r'(january)|(february)|(march)|(april)|(may)|(june)|(july)|(august)|(september)|(october)|(november)|(december)'
+    #     month = r'(' + months_num + r'|' + months_short + r'|' + months_long + r')'
+    #     regex_year = r'((20|19)(\d{2})|(\d{2}))'
+    #     year = regex_year
+    #     start_date = month + not_alpha_numeric + r"?" + year
         
-        # end_date = r'((' + number + r'?' + not_alpha_numeric + r"?" + number + not_alpha_numeric + r"?" + year + r')|(present|current))'
-        end_date = r'((' + number + r'?' + not_alpha_numeric + r"?" + month + not_alpha_numeric + r"?" + year + r')|(present|current|till date|today))'
-        longer_year = r"((20|19)(\d{2}))"
-        year_range = longer_year + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))" + r'(' + longer_year + r'|(present|current|till date|today))'
-        date_range = r"(" + start_date + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))" + end_date + r")|(" + year_range + r")"
+    #     # end_date = r'((' + number + r'?' + not_alpha_numeric + r"?" + number + not_alpha_numeric + r"?" + year + r')|(present|current))'
+    #     end_date = r'((' + number + r'?' + not_alpha_numeric + r"?" + month + not_alpha_numeric + r"?" + year + r')|(present|current|till date|today))'
+    #     longer_year = r"((20|19)(\d{2}))"
+    #     year_range = longer_year + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))" + r'(' + longer_year + r'|(present|current|till date|today))'
+    #     date_range = r"(" + start_date + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))" + end_date + r")|(" + year_range + r")"
 
         
-        regular_expression = re.compile(date_range, re.IGNORECASE)
+    #     regular_expression = re.compile(date_range, re.IGNORECASE)
         
-        regex_result = re.search(regular_expression, resume_text)
+    #     regex_result = re.search(regular_expression, resume_text)
         
-        while regex_result:
+    #     while regex_result:
           
-          try:
-            date_range = regex_result.group()
-            # print(date_range)
-            # print("*"*100)
-            try:
+    #       try:
+    #         date_range = regex_result.group()
+    #         # print(date_range)
+    #         # print("*"*100)
+    #         try:
               
-                year_range_find = re.compile(year_range, re.IGNORECASE)
-                year_range_find = re.search(year_range_find, date_range)
-                # print("year_range_find",year_range_find.group())
+    #             year_range_find = re.compile(year_range, re.IGNORECASE)
+    #             year_range_find = re.search(year_range_find, date_range)
+    #             # print("year_range_find",year_range_find.group())
                                 
-                # replace = re.compile(r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))", re.IGNORECASE)
-                replace = re.compile(r"((\s*to\s*)|" + not_alpha_numeric + r"{1,4})", re.IGNORECASE)
-                replace = re.search(replace, year_range_find.group().strip())
-                # print(replace.group())
-                # print(year_range_find.group().strip().split(replace.group()))
-                start_year_result, end_year_result = year_range_find.group().strip().split(replace.group())
-                # print(start_year_result, end_year_result)
-                # print("*"*100)
-                start_year_result = int(correct_year(start_year_result))
-                if (end_year_result.lower().find('present') != -1 or 
-                    end_year_result.lower().find('current') != -1 or 
-                    end_year_result.lower().find('till date') != -1 or 
-                    end_year_result.lower().find('today') != -1): 
-                    end_month = date.today().month  # current month
-                    end_year_result = date.today().year  # current year
-                else:
-                    end_year_result = int(correct_year(end_year_result))
+    #             # replace = re.compile(r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))", re.IGNORECASE)
+    #             replace = re.compile(r"((\s*to\s*)|" + not_alpha_numeric + r"{1,4})", re.IGNORECASE)
+    #             replace = re.search(replace, year_range_find.group().strip())
+    #             # print(replace.group())
+    #             # print(year_range_find.group().strip().split(replace.group()))
+    #             start_year_result, end_year_result = year_range_find.group().strip().split(replace.group())
+    #             # print(start_year_result, end_year_result)
+    #             # print("*"*100)
+    #             start_year_result = int(correct_year(start_year_result))
+    #             if (end_year_result.lower().find('present') != -1 or 
+    #                 end_year_result.lower().find('current') != -1 or 
+    #                 end_year_result.lower().find('till date') != -1 or 
+    #                 end_year_result.lower().find('today') != -1): 
+    #                 end_month = date.today().month  # current month
+    #                 end_year_result = date.today().year  # current year
+    #             else:
+    #                 end_year_result = int(correct_year(end_year_result))
 
 
-            except Exception as e:
-                # logging.error(str(e))
-                start_date_find = re.compile(start_date, re.IGNORECASE)
-                start_date_find = re.search(start_date_find, date_range)
+    #         except Exception as e:
+    #             # logging.error(str(e))
+    #             start_date_find = re.compile(start_date, re.IGNORECASE)
+    #             start_date_find = re.search(start_date_find, date_range)
 
-                non_alpha = re.compile(not_alpha_numeric, re.IGNORECASE)
-                non_alpha_find = re.search(non_alpha, start_date_find.group().strip())
+    #             non_alpha = re.compile(not_alpha_numeric, re.IGNORECASE)
+    #             non_alpha_find = re.search(non_alpha, start_date_find.group().strip())
 
-                replace = re.compile(start_date + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))", re.IGNORECASE)
-                replace = re.search(replace, date_range)
-                date_range = date_range[replace.end():]
+    #             replace = re.compile(start_date + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))", re.IGNORECASE)
+    #             replace = re.search(replace, date_range)
+    #             date_range = date_range[replace.end():]
         
-                start_year_result = start_date_find.group().strip().split(non_alpha_find.group())[-1]
+    #             start_year_result = start_date_find.group().strip().split(non_alpha_find.group())[-1]
 
-                # if len(start_year_result)<2:
-                #   if int(start_year_result) > int(str(date.today().year)[-2:]):
-                #     start_year_result = str(int(str(date.today().year)[:-2]) - 1 )+start_year_result
-                #   else:
-                #     start_year_result = str(date.today().year)[:-2]+start_year_result
-                # start_year_result = int(start_year_result)
-                start_year_result = int(correct_year(start_year_result))
+    #             # if len(start_year_result)<2:
+    #             #   if int(start_year_result) > int(str(date.today().year)[-2:]):
+    #             #     start_year_result = str(int(str(date.today().year)[:-2]) - 1 )+start_year_result
+    #             #   else:
+    #             #     start_year_result = str(date.today().year)[:-2]+start_year_result
+    #             # start_year_result = int(start_year_result)
+    #             start_year_result = int(correct_year(start_year_result))
 
-                if date_range.lower().find('present') != -1 or date_range.lower().find('current') != -1:
-                    end_month = date.today().month  # current month
-                    end_year_result = date.today().year  # current year
-                else:
-                    end_date_find = re.compile(end_date, re.IGNORECASE)
-                    end_date_find = re.search(end_date_find, date_range)
+    #             if date_range.lower().find('present') != -1 or date_range.lower().find('current') != -1:
+    #                 end_month = date.today().month  # current month
+    #                 end_year_result = date.today().year  # current year
+    #             else:
+    #                 end_date_find = re.compile(end_date, re.IGNORECASE)
+    #                 end_date_find = re.search(end_date_find, date_range)
 
-                    end_year_result = end_date_find.group().strip().split(non_alpha_find.group())[-1]
+    #                 end_year_result = end_date_find.group().strip().split(non_alpha_find.group())[-1]
 
-                    # if len(end_year_result)<2:
-                    #   if int(end_year_result) > int(str(date.today().year)[-2:]):
-                    #     end_year_result = str(int(str(date.today().year)[:-2]) - 1 )+end_year_result
-                    #   else:
-                    #     end_year_result = str(date.today().year)[:-2]+end_year_result
-                    # end_year_result = int(end_year_result)
-                    try:
-                      end_year_result = int(correct_year(end_year_result))
-                    except Exception as e:
-                      logging.error(str(e))
-                      end_year_result = int(re.search("\d+",correct_year(end_year_result)).group())
+    #                 # if len(end_year_result)<2:
+    #                 #   if int(end_year_result) > int(str(date.today().year)[-2:]):
+    #                 #     end_year_result = str(int(str(date.today().year)[:-2]) - 1 )+end_year_result
+    #                 #   else:
+    #                 #     end_year_result = str(date.today().year)[:-2]+end_year_result
+    #                 # end_year_result = int(end_year_result)
+    #                 try:
+    #                   end_year_result = int(correct_year(end_year_result))
+    #                 except Exception as e:
+    #                   logging.error(str(e))
+    #                   end_year_result = int(re.search("\d+",correct_year(end_year_result)).group())
 
-            if (start_year == -1) or (start_year_result <= start_year):
-                start_year = start_year_result
-            if (end_year == -1) or (end_year_result >= end_year):
-                end_year = end_year_result
+    #         if (start_year == -1) or (start_year_result <= start_year):
+    #             start_year = start_year_result
+    #         if (end_year == -1) or (end_year_result >= end_year):
+    #             end_year = end_year_result
 
-            resume_text = resume_text[regex_result.end():].strip()
-            regex_result = re.search(regular_expression, resume_text)
-          except Exception as e:
-            logging.error(str(e))
-            resume_text = resume_text[regex_result.end():].strip()
-            regex_result = re.search(regular_expression, resume_text)
+    #         resume_text = resume_text[regex_result.end():].strip()
+    #         regex_result = re.search(regular_expression, resume_text)
+    #       except Exception as e:
+    #         logging.error(str(e))
+    #         resume_text = resume_text[regex_result.end():].strip()
+    #         regex_result = re.search(regular_expression, resume_text)
             
-        return end_year - start_year  # Use the obtained month attribute
+    #     return end_year - start_year  # Use the obtained month attribute
 
     # except Exception as exception_instance:
     #   logging.error('Issue calculating experience: '+str(exception_instance))
     #   return None
 
-    def get_experience(resume_segments):
-        total_exp = 0
-        if len(resume_segments['work_and_employment'].keys()):
-            text = ""
-            for key, values in resume_segments['work_and_employment'].items():
-                text += " ".join(values) + " "
-            total_exp = resumeparse.calculate_experience(text)
-            return total_exp, text
-        else:
-            text = ""
-            for key in resume_segments.keys():
-                if key != 'education_and_training':
-                    if key == 'contact_info':
-                        text += " ".join(resume_segments[key]) + " "
-                    else:
-                        for key_inner, value in resume_segments[key].items():
-                            text += " ".join(value) + " "
-            total_exp = resumeparse.calculate_experience(text)
-            return total_exp, text
-        return total_exp, " "
+    # def get_experience(resume_segments):
+    #     total_exp = 0
+    #     if len(resume_segments['work_and_employment'].keys()):
+    #         text = ""
+    #         for key, values in resume_segments['work_and_employment'].items():
+    #             text += " ".join(values) + " "
+    #         total_exp = resumeparse.calculate_experience(text)
+    #         return total_exp, text
+    #     else:
+    #         text = ""
+    #         for key in resume_segments.keys():
+    #             if key != 'education_and_training':
+    #                 if key == 'contact_info':
+    #                     text += " ".join(resume_segments[key]) + " "
+    #                 else:
+    #                     for key_inner, value in resume_segments[key].items():
+    #                         text += " ".join(value) + " "
+    #         total_exp = resumeparse.calculate_experience(text)
+    #         return total_exp, text
+    #     return total_exp, " "
 
     def find_phone(text):
         try:
@@ -603,94 +623,139 @@ class resumeparse(object):
             except IndexError:
                 return None
 
-    def extract_objective(text):
-        objectives = []
+    # def extract_objective(text):
+    #     objectives = []
 
-        objective_terms = [
-            'career goal',
-            'objective',
-            'profile',
-            'PROFILE',
-            'profile summary',
-            'profile & strengths',
-            'about me',
-            'background',
-            'career objective',
-            'employment objective',
-            'professional objective',        
-            'career summary',
-            'work summary',
-            'carrier summery',
-            'programmer analyst',
-            'professional summary',
-            'summary of qualifications',
-            'summary'
-        ]
+    #     objective_terms = [
+    #         'profile summary',
+    #         'profile & strengths',
+    #         'career objective',
+    #         'employment objective',
+    #         'professional objective',        
+    #         'career summary',
+    #         'work summary',
+    #         'carrier summery',
+    #         'programmer analyst',
+    #         'professional summary',
+    #         'summary of qualifications',
+    #         'summary',
+    #         'SUMMARY'
+    #         'career goal',
+    #         'objective',
+    #         'PROFILE',
+    #         'about me',
+    #         'background',
+    #     ]
 
-        objective_pattern = '|'.join(map(re.escape, objective_terms))
+    #     objective_pattern = '|'.join(map(re.escape, objective_terms))
 
 
-        objective_starts = re.finditer(fr'({objective_pattern})[^\w\n]*(\w[^\n]*)', text, re.IGNORECASE)
+    #     objective_starts = re.finditer(fr'({objective_pattern})[^\w\n](\w[^\n])', text, re.IGNORECASE)
         
 
         
 
-        for start_match in objective_starts:
-            section_type = start_match.group(1)
-            section_start = start_match.group(2)
+        # for start_match in objective_starts:
+        #     section_type = start_match.group(1)
+        #     section_start = start_match.group(2)
+
             
 
-            section_end_match = re.search(r'(?::|$)', section_start)
+        #     section_end_match = re.search(r'(?::|$)', section_start)
+        #     if section_end_match:
+        #         section_end_match1 = re.search(r'(?<=\. )(?::|$|SUMMARY|TECHNICAL SKILL|PROFESSIONAL|Education|EDUCATION|\bExperience\b|WORK EXPERIENCE|EXPERIENCE|Technical Skill|Skills|SKILL|SKILLS|Skill|Course|COURSE|Academic Qualification|\bCAREER TIMELINE\b)', section_start)
+             
+                        
+        #         if section_end_match1:
+        #             section_end_index = section_end_match1.start()
+        #             section_details = section_start[:section_end_index].strip()
+        #             objectives.append((section_type, section_details))
 
-            if section_end_match:
-                section_end_index = section_end_match.start()
-                section_details = section_start[:section_end_index].strip()
-                objectives.append((section_type, section_details))
-
-            else:
-                section_end_match = re.search(r'(?<=\. )(?::|$|TECHNICAL SKILL|Education|EDUCATION|\bExperience\b|WORK EXPERIENCE|EXPERIENCE|Technical Skill|Skills|SKILL|SKILLS|Skill|Course|COURSE|Academic Qualification|\bCAREER TIMELINE\b|Certifications)', section_start)
+        #     else:
+                
+        #         section_end_match = re.search(r'(?<=\. )(?::|$|TECHNICAL SKILL|Education|EDUCATION|\bExperience\b|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EXPERIENCE|Technical Skill|Skills|SKILL|SKILLS|Skill|Course|COURSE|Academic Qualification|\bCAREER TIMELINE\b)', section_start)
             
 
-                if section_end_match:
-                    section_end_index = section_end_match.start()
-                    section_details = section_start[:section_end_index].strip()
-                    objectives.append((section_type, section_details))
+        #         if section_end_match:
+        #             section_end_index = section_end_match.start()
+        #             section_details = section_start[:section_end_index].strip()
+        #             objectives.append((section_type, section_details))
+                    
 
 
-        return objectives
+
+        # return objectives
+
+    # def extract_full(resume_lines, full_text):
+    #     # print(resume_lines, 679)
+    #     print(full_text, 680)
+
+    #     data = resume_lines
+
+    #     if not full_text.strip():
+    #         return ""
+
+
+    #     else:
+    #         mainframe_index = next((index for index, value in enumerate(data) if full_text in value), None)
+    #         full_name = resume_lines[mainframe_index]
+    #         return full_name
+    #     # print(mainframe_info, "691")
+
+
+        #=======
    
-    def extract_name(resume_text):
-        nlp_text = nlp(resume_text)
-        print(nlp_text)
+    # def extract_name(resume_text):
+    #     nlp_text = nlp(resume_text)
+    #     print(resume_text)
 
-        pattern = [{'POS': 'PROPN'}]
-        matcher.add('NAME', None, pattern)
+    #     # First name and Last name are always Proper Nouns
+    #     # pattern_FML = [{'POS': 'PROPN', 'ENT_TYPE': 'PERSON', 'OP': '+'}]
 
-        matches = matcher(nlp_text)
+    #     pattern = [{'POS': 'PROPN'}, {'POS': 'PROPN'}]
+    #     matcher.add('NAME', None, pattern)
+
+    #     matches = matcher(nlp_text)
+    #     first_name = ""
+    #     last_name = ""
+    #     for match_id, start, end in matches:
+    #         span = nlp_text[start:end]
+    #         if not first_name:
+    #             first_name = span.text
+    #         else:
+    #               last_name = span.text    
+    #     if ' ' in first_name:
+    #             first_name, last_name = first_name.split(' ', 1)
+    #     return first_name, last_name
+    #========
+
+
+    # def extract_name(resume_text):
+    #     nlp_text = nlp(resume_text)
+    #     print(nlp_text)
+
+    #     contains_software = 'sldba' in [token.text.lower() for token in nlp_text]
+
+    #     print(contains_software, "728")
 
         
 
-        for match_id, start, end in matches:
-            span = nlp_text[start]
+    #     pattern = [{'POS': 'PROPN'}]
+    #     matcher.add('NAME', None, pattern)
+
+    #     matches = matcher(nlp_text)
+
+    #     avoid_words = ["sldba", "name", 'resume']
+
+        
+
+    #     for match_id, start, end in matches:
+    #         span = nlp_text[start]
+    #         if any(word.lower() in span.text.lower() for word in avoid_words):
+    #             continue
             
-            return span.text
-        return ""
-
-
-    def extract_full(resume_lines, full_text):
-        # print(resume_lines, 679)
-        print(full_text, 680)
-
-        data = resume_lines
-
-        if not full_text.strip():
-            return ""
-
-
-        else:
-            mainframe_index = next((index for index, value in enumerate(data) if full_text in value), None)
-            full_name = resume_lines[mainframe_index]
-            return full_name
+    #         return span.text
+    #     return ""
 
     # def extract_university(text, file):
     #     df = pd.read_csv(file, header=None)
@@ -708,176 +773,202 @@ class resumeparse(object):
         
     #     return college_name
 
-    def job_designition(text):
-        job_titles = []
+    # def job_designition(text):
+    #     job_titles = []
         
-        __nlp = nlp(text.lower())
+    #     __nlp = nlp(text.lower())
         
-        matches = designitionmatcher(__nlp)
-        for match_id, start, end in matches:
-            span = __nlp[start:end]
-            job_titles.append(span.text)
-        return job_titles
+    #     matches = designitionmatcher(__nlp)
+    #     for match_id, start, end in matches:
+    #         span = __nlp[start:end]
+    #         job_titles.append(span.text)
+    #     return job_titles
 
-    def get_degree(text):
-        doc = custom_nlp2(text)
-        degree = []
+    # def get_degree(text):
+    #     doc = custom_nlp2(text)
+    #     degree = []
 
-        degree = [ent.text.replace("\n", " ") for ent in list(doc.ents) if ent.label_ == 'Degree']
-        return list(dict.fromkeys(degree).keys())
+    #     degree = [ent.text.replace("\n", " ") for ent in list(doc.ents) if ent.label_ == 'Degree']
+    #     return list(dict.fromkeys(degree).keys())
 
-    def get_company_working(text):
-        doc = custom_nlp3(text)
-        degree = []
+    # def get_company_working(text):
+    #     doc = custom_nlp3(text)
+    #     degree = []
 
-        degree = [ent.text.replace("\n", " ") for ent in list(doc.ents)]
-        return list(dict.fromkeys(degree).keys())
+    #     degree = [ent.text.replace("\n", " ") for ent in list(doc.ents)]
+    #     return list(dict.fromkeys(degree).keys())
     
-    def extract_skills(text):
+    # def extract_skills(text):
 
-        skills = []
+    #     skills = []
 
-        __nlp = nlp(text.lower())
-        # Only run nlp.make_doc to speed things up
+    #     __nlp = nlp(text.lower())
+    #     # Only run nlp.make_doc to speed things up
 
-        matches = skillsmatcher(__nlp)
-        for match_id, start, end in matches:
-            span = __nlp[start:end]
-            skills.append(span.text)
-        skills = list(set(skills))
-        return skills
-    def extract_location(text):
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(text)
+    #     matches = skillsmatcher(__nlp)
+    #     for match_id, start, end in matches:
+    #         span = __nlp[start:end]
+    #         skills.append(span.text)
+    #     skills = list(set(skills))
+    #     return skills
+    # def extract_location(text):
+    #     nlp = spacy.load("en_core_web_sm")
+    #     doc = nlp(text)
 
-        locations = []
-        for ent in doc.ents:
-            if ent.label_ in ["GPE", "LOC"]:
-                locations.append(ent.text)
+    #     locations = []
+    #     for ent in doc.ents:
+    #         if ent.label_ in ["GPE", "LOC"]:
+    #             locations.append(ent.text)
 
-        formatted_location = ', '.join(locations)  # Format as "village, city"
+    #     formatted_location = ', '.join(locations)  # Format as "village, city"
     
-        if formatted_location.strip():
-            return formatted_location.strip()
-        else:
-            return None
+    #     if formatted_location.strip():
+    #         return formatted_location.strip()
+    #     else:
+    #         return None
     
     
-    def extract_address(text):
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(text)
+    # def extract_address(text):
+    #     nlp = spacy.load("en_core_web_sm")
+    #     doc = nlp(text)
 
-        address_components = []
-        for ent in doc.ents:
-            if ent.label_ in ["GPE", "LOC"]:
-                if ent.root.dep_ not in ['prep', 'pobj']:  # Exclude prepositions and objects
-                    address_components.append(ent.text)
+    #     address_components = []
+    #     for ent in doc.ents:
+    #         if ent.label_ in ["GPE", "LOC"]:
+    #             if ent.root.dep_ not in ['prep', 'pobj']:  # Exclude prepositions and objects
+    #                 address_components.append(ent.text)
 
-        formatted_address = ', '.join(address_components)  # Format as "village, city"
+    #     formatted_address = ', '.join(address_components)  # Format as "village, city"
 
-        if formatted_address.strip():
-            return formatted_address.strip()
-        else:
-            return None
+    #     if formatted_address.strip():
+    #         return formatted_address.strip()
+    #     else:
+    #         return None
    
     
     
-    def read_file(self, file,docx_parser = "tika"):
+        
+        
+    
+    def read_file(self, file, count_newfile, count_oldfile):
         """
         file : Give path of resume file
         docx_parser : Enter docx2txt or tika, by default is tika
         """
         # file = "/content/Asst Manager Trust Administration.docx"
+        print("comming to file")
         print("\n\n\n\n File == ",file,"\n\n")
+        
+        count_newfile = int(count_newfile)
+        count_oldfile = int(count_oldfile)
+        print(count_newfile, "864")
         file = os.path.join(file)
+        print("15")
         if file.endswith('docx'):
+            print("in docx")
             resume_lines, raw_text = resumeparse.convert_docx_to_txt(file)
         
-        elif file.endswith('doc'):
+        elif file.endswith('doc') or file.endswith('.rtf'):
+            print("in doc 781")
             resume_lines, raw_text = resumeparse.convert_doc_to_txt(file)
         
         elif file.endswith('pdf'):
+            print("in pdf")
             resume_lines, raw_text = resumeparse.convert_pdf_to_txt(file)
         elif file.endswith('txt'):
+            print("in txt")
             with open(file, 'r', encoding='latin') as f:
                 resume_lines = f.readlines()
 
         else:
             resume_lines = None
         resume_segments = resumeparse.segment(resume_lines)
+        print("2")
         
         full_text = " ".join(resume_lines)
 
         email = resumeparse.extract_email(full_text)
+        print(email, "882")
         phone = resumeparse.find_phone(full_text)
-        name = resumeparse.extract_name(" ".join(resume_segments['contact_info']))
-        print(name, "909")
-        fullname = resumeparse.extract_full(resume_lines, name)
-        # total_exp, text = resumeparse.get_experience(resume_segments)
-        # university = resumeparse.extract_university(full_text, os.path.join(base_path,'world_universities.csv'))
-
-        # designition = resumeparse.job_designition(full_text)
-        # designition = list(dict.fromkeys(designition).keys())
-
-        # degree = resumeparse.get_degree(full_text)
-        # company_working = resumeparse.get_company_working(full_text)
-       
-        skills = ""
-
-        if len(resume_segments['skills'].keys()):
-            for key , values in resume_segments['skills'].items():
-              skills += re.sub(key, '', ",".join(values), flags=re.IGNORECASE)            
-            skills = skills.strip().strip(",").split(",")
         
-        if len(skills) == 0:
-            skills = resumeparse.extract_skills(full_text)
-        skills = list(dict.fromkeys(skills).keys())
-         
-        # project_details = resumeparse.extract_projects(full_text)
-        # location =  resumeparse.extract_location(full_text)
-        # address_components = resumeparse.extract_address(full_text)
+        
+        def save_file(file_path, destination_directory, new_filename):
+    
+            if os.path.isfile(file_path):
+        
+                destination_path = os.path.join(destination_directory, new_filename)
 
-        objective = resumeparse.extract_objective(full_text)
-        if not objective:
-            objectives=""
+        
+                shutil.copy(file_path, destination_path)
+
+                print(f"File saved successfully at: {destination_path}")
+            else:
+                print(f"Error: File not found at {file_path}")
+
+        def save_file1(file_path, destination_directory, new_filename):
+    
+            if os.path.isfile(file_path):
+        
+                destination_path = os.path.join(destination_directory, new_filename)
+                shutil.copy(file_path, destination_path)
+
+                print(f"File saved successfully at: {destination_path}")
+            else:
+                print(f"Error: File not found at {file_path}")
+
+        
+
+        host = 'localhost'
+        user = 'root'
+        password = 'raje123456@'
+        database = 'multi_threading'
+
+        connection = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+        )
+
+        cursor = connection.cursor()
+
+        print(email)
+        print(phone)
+
+        
+        query = "SELECT Email FROM email WHERE Email = %s"
+        cursor.execute(query, (email,))
+
+        row = cursor.fetchone()
+
+        if row:
+            
+            print(f"Row with ID {email} exists:")
+            print(row)
+            count_newfile +=1
+            file_path = file
+            destination_directory = "./Old files"
+            new_filename = file
+            save_file(file_path, destination_directory, new_filename)
             
         else:
-            full_sentences = objective[0][1][:1500]
-            if not full_sentences.endswith('.'):
-                
-                text = full_sentences.split('.')
-                full_sentences = '.'.join(text[:-1])
-                objectives = full_sentences
-            else:
-                objectives = full_sentences
-
-
-        names = fullname
-        array = names.split(" ")
-        print(array)
-        first_name = array[0]
-        last_name = ' '.join(array[1:])
-                
-
-
-
-         
+            
+            print(f"Row with ID {email} does not exist.")
+            count_oldfile += 1
+            file_path = file
+            destination_directory = "./New File"
+            new_filename = file
+            save_file(file_path, destination_directory, new_filename)
+            
+        
+        
          
         return {
             "email": email,
             "phone": phone,
-            "first_name": first_name,
-            "last_name": last_name,
-            "objective":objectives,
-            # "total_exp": total_exp,
-            # "university": university,
-            # "designition": designition,
-            # "degree": degree,
-            "skills": skills,
-            # "Companiesworkedat": company_working,
-            # "Projects": project_details,
-            # "locations": location,
-            # "address_components": address_components
+            "row_newfile": count_newfile,
+            "row_oldfile": count_oldfile
+            
         }
     
     def display(self):
@@ -887,5 +978,3 @@ class resumeparse(object):
 parser_obj = resumeparse()
 # parsed_resume_data = parser_obj.read_file('sample/Naukri_AbhijeetDey[8y_0m].doc')
 # print("\n\n ========== parsed_data ========= \n\n")
-
-
